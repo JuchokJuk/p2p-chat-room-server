@@ -1,14 +1,30 @@
-import { Room } from "../Room.ts";
-import { user } from "../user.ts";
+import type { Room } from "../Room.ts";
+import { send } from "../send.ts";
 
-export function chat(request: Request, room: Room) {
-  if (request.headers.get("upgrade") !== "websocket") {
-    return new Response(null, { status: 501 });
-  }
+export function chat(room: Room, socket: WebSocket) {
+  const UUID = crypto.randomUUID();
 
-  const { socket, response } = Deno.upgradeWebSocket(request);
+  socket.onopen = () => {
+      send(socket, {
+        action: "init user",
+        payload: UUID,
+      });
+      room.saveUser(UUID, socket);
+  };
 
-  user(room, socket);
+  socket.addEventListener("message", (event) => {
+    const message = JSON.parse(event.data);
 
-  return response;
+    if (message.action === "set peer for existing user") {
+      console.log("GOT set peer for existing user", message.payload);
+      room.setPeerForExistingUser(UUID, socket, message.payload);
+    } else if (message.action === "set peer for new user") {
+      console.log("GOT set peer for new user", message.payload);
+      room.setPeerForNewUser(message.payload.newUserUUID, message.payload.existingUserUUID, message.payload.peerUUID);
+    }
+  });
+
+  socket.addEventListener("close", () => {
+    room.removeUser(UUID);
+  });
 }

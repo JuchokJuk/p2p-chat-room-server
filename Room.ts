@@ -14,7 +14,7 @@ type User = {
 export class Room {
   users: User[] = [];
 
-  saveFirstUser(UUID: string, socket: WebSocket) {
+  saveUser(UUID: string, socket: WebSocket) {
     this.users.push({
       UUID,
       socket,
