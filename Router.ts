@@ -65,7 +65,7 @@ export class Router {
         const params = route.pattern.exec(request.url).pathname.groups;
         try {
           return await route["handler"](request, params);
-        } catch (error) {
+        } catch (_error) {
           return new Response(null, { status: 500 });
         }
       }

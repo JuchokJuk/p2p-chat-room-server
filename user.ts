@@ -24,13 +24,10 @@ export function user(room: Room, socket: WebSocket) {
     if (message.action === "save first user") {
       console.log("GOT save first user", message.payload);
       room.saveFirstUser(UUID, socket);
-    }
-
-    if (message.action === "set peer for existing user") {
+    } else if (message.action === "set peer for existing user") {
       console.log("GOT set peer for existing user", message.payload);
       room.setPeerForExistingUser(UUID, socket, message.payload);
-    }
-    if (message.action === "set peer for new user") {
+    } else if (message.action === "set peer for new user") {
       console.log("GOT set peer for new user", message.payload);
       room.setPeerForNewUser(message.payload.newUserUUID, message.payload.existingUserUUID, message.payload.peerUUID);
     }
