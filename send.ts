@@ -4,7 +4,7 @@ export function send(socket: WebSocket, message: { action: string; payload: unkn
     payload: message.payload,
   });
 
-  if (socket.readyState === 1) {
+  if (socket.readyState === WebSocket.OPEN) {
     socket.send(rawMessage);
   }
 }

@@ -6,6 +6,12 @@ export function chat(room: Room, socket: WebSocket) {
 
   let timeoutId: number;
 
+  function close(){
+    if(socket.readyState === WebSocket.OPEN){
+      socket.close();
+    }
+  }
+
   socket.addEventListener("open", () => {
     send(socket, {
       action: "init user",
@@ -13,7 +19,7 @@ export function chat(room: Room, socket: WebSocket) {
     });
     room.saveUser(UUID, socket);
 
-    timeoutId = setTimeout(socket.close, 10000);
+    timeoutId = setTimeout(close, 10000);
   });
 
   socket.addEventListener("message", (event) => {
@@ -22,7 +28,7 @@ export function chat(room: Room, socket: WebSocket) {
     if (message.action === "heartbeat") {
       console.log("heartbeat");
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(socket.close, 10000);
+      timeoutId = setTimeout(close, 10000);
     } else if (message.action === "set peer for existing user") {
       room.setPeerForExistingUser(UUID, socket, message.payload);
     } else if (message.action === "set peer for new user") {
