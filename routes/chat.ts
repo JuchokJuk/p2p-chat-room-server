@@ -6,10 +6,8 @@ export function chat(room: Room, socket: WebSocket) {
 
   let timeoutId: number;
 
-  function close(){
-    if(socket.readyState === WebSocket.OPEN){
-      socket.close();
-    }
+  function close() {
+    socket.close(1000);
   }
 
   socket.addEventListener("open", () => {
