@@ -22,16 +22,11 @@ export function chat(room: Room, socket: WebSocket) {
     const message = JSON.parse(event.data);
 
     if (message.action === "heartbeat") {
-      console.log("GOT heartbeat", message.payload);
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        socket.close();
-      }, 10000);
+      timeoutId = setTimeout(socket.close, 10000);
     } else if (message.action === "set peer for existing user") {
-      console.log("GOT set peer for existing user", message.payload);
       room.setPeerForExistingUser(UUID, socket, message.payload);
     } else if (message.action === "set peer for new user") {
-      console.log("GOT set peer for new user", message.payload);
       room.setPeerForNewUser(message.payload.newUserUUID, message.payload.existingUserUUID, message.payload.peerUUID);
     }
   });
