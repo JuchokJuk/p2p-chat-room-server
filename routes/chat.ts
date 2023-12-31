@@ -13,15 +13,14 @@ export function chat(room: Room, socket: WebSocket) {
     });
     room.saveUser(UUID, socket);
 
-    timeoutId = setTimeout(() => {
-      socket.close();
-    }, 10000);
+    timeoutId = setTimeout(socket.close, 10000);
   });
 
   socket.addEventListener("message", (event) => {
     const message = JSON.parse(event.data);
 
     if (message.action === "heartbeat") {
+      console.log("heartbeat");
       clearTimeout(timeoutId);
       timeoutId = setTimeout(socket.close, 10000);
     } else if (message.action === "set peer for existing user") {
@@ -32,6 +31,8 @@ export function chat(room: Room, socket: WebSocket) {
   });
 
   socket.addEventListener("close", () => {
+    console.log("remove user");
+    clearTimeout(timeoutId);
     room.removeUser(UUID);
   });
 }
