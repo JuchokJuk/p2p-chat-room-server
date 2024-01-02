@@ -37,6 +37,14 @@ export function chat(users: User[], socket: WebSocket) {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(close, 10000);
     } else if (message.action === "save peer UUID") {
+      for (const user of users) {
+        if (user.peerUUID) {
+          send(user.socket, {
+            action: "add user",
+            payload: message.payload,
+          });
+        }
+      }
       currentUser.peerUUID = message.payload;
     }
   });
