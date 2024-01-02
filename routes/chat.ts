@@ -19,10 +19,17 @@ export function chat(room: Room, socket: WebSocket) {
   }
 
   socket.addEventListener("open", () => {
-    send(socket, {
-      action: "init user",
-      payload: UUID,
-    });
+    if (room.users.length === 0) {
+      send(socket, {
+        action: "init first user",
+        payload: UUID,
+      });
+    } else {
+      send(socket, {
+        action: "init user",
+        payload: { UUID, users: room.users.map((user) => user.UUID) },
+      });
+    }
     room.saveUser(UUID, socket);
 
     timeoutId = setTimeout(close, 10000);
