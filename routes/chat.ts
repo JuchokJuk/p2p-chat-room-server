@@ -24,7 +24,7 @@ export function chat(users: User[], socket: WebSocket) {
     if (users.length > 0) {
       send(socket, {
         action: "save users",
-        payload: users.map((user) => user.peerUUID),
+        payload: users.map((user) => user.peerUUID).filter((peerUUID) => peerUUID !== currentUser.peerUUID),
       });
     }
     timeoutId = setTimeout(close, 10000);
