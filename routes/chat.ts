@@ -16,7 +16,7 @@ export function chat(users: User[], socket: WebSocket) {
 
   function removeUser() {
     clearTimeout(timeoutId);
-    users = users.filter((user) => user.peerUUID !== currentUser.peerUUID);
+    users = users.filter((user) => user !== currentUser);
   }
 
   socket.addEventListener("open", () => {
