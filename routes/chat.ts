@@ -1,37 +1,32 @@
-import type { Room } from "../Room.ts";
+import { User } from "../main.ts";
 import { send } from "../send.ts";
 
-export function chat(room: Room, socket: WebSocket) {
-  const UUID = crypto.randomUUID();
+export function chat(users: User[], socket: WebSocket) {
+  const currentUser = {
+    socket,
+    peerUUID: undefined,
+  };
 
   let timeoutId: number;
 
   function close() {
-    console.log("close", UUID, socket.readyState);
     socket.close();
     removeUser();
   }
 
   function removeUser() {
-    console.log("remove user");
     clearTimeout(timeoutId);
-    room.removeUser(UUID);
+    users = users.filter((user) => user.peerUUID !== currentUser.peerUUID);
   }
 
   socket.addEventListener("open", () => {
-    if (room.users.length === 0) {
+    users.push(currentUser);
+    if (users.length > 0) {
       send(socket, {
-        action: "init first user",
-        payload: UUID,
-      });
-    } else {
-      send(socket, {
-        action: "init user",
-        payload: { UUID, users: room.users.map((user) => user.UUID) },
+        action: "save users",
+        payload: users.map((user) => user.peerUUID),
       });
     }
-    room.saveUser(UUID, socket);
-
     timeoutId = setTimeout(close, 10000);
   });
 
@@ -39,13 +34,10 @@ export function chat(room: Room, socket: WebSocket) {
     const message = JSON.parse(event.data);
 
     if (message.action === "heartbeat") {
-      console.log("heartbeat");
       clearTimeout(timeoutId);
       timeoutId = setTimeout(close, 10000);
-    } else if (message.action === "set peer for existing user") {
-      room.setPeerForExistingUser(UUID, socket, message.payload);
-    } else if (message.action === "set peer for new user") {
-      room.setPeerForNewUser(message.payload.newUserUUID, message.payload.existingUserUUID, message.payload.peerUUID);
+    } else if (message.action === "save peer UUID") {
+      currentUser.peerUUID = message.payload;
     }
   });
 
