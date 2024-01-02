@@ -9,6 +9,13 @@ export function chat(room: Room, socket: WebSocket) {
   function close() {
     console.log("close", UUID, socket.readyState);
     socket.close();
+    removeUser();
+  }
+
+  function removeUser() {
+    console.log("remove user");
+    clearTimeout(timeoutId);
+    room.removeUser(UUID);
   }
 
   socket.addEventListener("open", () => {
@@ -35,9 +42,5 @@ export function chat(room: Room, socket: WebSocket) {
     }
   });
 
-  socket.addEventListener("close", () => {
-    console.log("remove user");
-    clearTimeout(timeoutId);
-    room.removeUser(UUID);
-  });
+  socket.addEventListener("close", removeUser);
 }
