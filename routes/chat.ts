@@ -7,7 +7,8 @@ export function chat(room: Room, socket: WebSocket) {
   let timeoutId: number;
 
   function close() {
-    socket.close(1000);
+    console.log("close", UUID, socket.readyState);
+    socket.close();
   }
 
   socket.addEventListener("open", () => {
