@@ -1,7 +1,7 @@
-import { User } from "../main.ts";
 import { send } from "../send.ts";
+import { Room } from "./Room.ts";
 
-export function chat(users: User[], socket: WebSocket) {
+export function chat(room: Room, socket: WebSocket) {
   const currentUser = {
     socket,
     peerUUID: undefined,
@@ -16,15 +16,15 @@ export function chat(users: User[], socket: WebSocket) {
 
   function removeUser() {
     clearTimeout(timeoutId);
-    users = users.filter((user) => user !== currentUser);
+    room.removeUser(currentUser)
   }
 
   socket.addEventListener("open", () => {
-    users.push(currentUser);
-    if (users.length > 0) {
+    room.addUser(currentUser)
+    if (room.users.length > 0) {
       send(socket, {
         action: "save users",
-        payload: users.map((user) => user.peerUUID).filter((peerUUID) => peerUUID !== currentUser.peerUUID),
+        payload: room.users.map((user) => user.peerUUID).filter((peerUUID) => peerUUID !== currentUser.peerUUID),
       });
     }
     timeoutId = setTimeout(close, 10000);
@@ -37,7 +37,7 @@ export function chat(users: User[], socket: WebSocket) {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(close, 10000);
     } else if (message.action === "save peer UUID") {
-      for (const user of users) {
+      for (const user of room.users) {
         if (user.peerUUID) {
           send(user.socket, {
             action: "add user",

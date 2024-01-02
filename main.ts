@@ -1,22 +1,21 @@
 import { Router } from "./Router.ts";
 import { debug } from "./routes/debug.ts";
 import { chat } from "./routes/chat.ts";
+import { Room } from "./routes/Room.ts";
 
 const router = new Router();
 
-export type User = { socket: WebSocket; peerUUID?: string };
-
-const users: User[] = [];
+const room = new Room();
 
 router.get("/debug", () => {
-  return debug(users);
+  return debug(room);
 });
 
 router.get("/chat", (request: Request) => {
   if (request.headers.get("upgrade") !== "websocket") return new Response(null, { status: 501 });
   const { socket, response } = Deno.upgradeWebSocket(request);
 
-  chat(users, socket);
+  chat(room, socket);
 
   return response;
 });
