@@ -3,6 +3,7 @@ import { Room } from "./Room.ts";
 
 export function chat(room: Room, socket: WebSocket) {
   const currentUser = {
+    UUID: crypto.randomUUID(),
     socket,
     peerUUID: undefined,
   };
@@ -11,22 +12,12 @@ export function chat(room: Room, socket: WebSocket) {
 
   function close() {
     socket.close();
-    removeUser();
-  }
-
-  function removeUser() {
-    clearTimeout(timeoutId);
-    room.removeUser(currentUser)
+    room.removeUser(currentUser);
   }
 
   socket.addEventListener("open", () => {
-    room.addUser(currentUser)
-    if (room.users.length > 0) {
-      send(socket, {
-        action: "save users",
-        payload: room.users.map((user) => user.peerUUID).filter((peerUUID) => peerUUID !== currentUser.peerUUID),
-      });
-    }
+
+    room.addUser(currentUser);
     timeoutId = setTimeout(close, 10000);
   });
 
@@ -37,17 +28,20 @@ export function chat(room: Room, socket: WebSocket) {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(close, 10000);
     } else if (message.action === "save peer UUID") {
+      currentUser.peerUUID = message.payload;
       for (const user of room.users) {
-        if (user.peerUUID) {
+        if (user !== currentUser) {
           send(user.socket, {
             action: "add user",
-            payload: message.payload,
+            payload: { UUID: currentUser.UUID, peerUUID: currentUser.peerUUID },
           });
         }
       }
-      currentUser.peerUUID = message.payload;
     }
   });
 
-  socket.addEventListener("close", removeUser);
+  socket.addEventListener("close", () => {
+    clearTimeout(timeoutId);
+    room.removeUser(currentUser);
+  });
 }

@@ -20,4 +20,4 @@ router.get("/chat", (request: Request) => {
   return response;
 });
 
-Deno.serve(async (r) => await router.route(r));
+Deno.serve(async (request) => await router.route(request));
