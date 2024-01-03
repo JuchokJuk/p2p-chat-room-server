@@ -1,9 +1,6 @@
 import { send } from "../send.ts";
 import { Room, User } from "./Room.ts";
 
-type Action = "heartbeat" | "savePeerUUID";
-type Message = { action: Action; payload: any };
-
 export function chat(room: Room, socket: WebSocket) {
   const currentUser: User = {
     UUID: crypto.randomUUID(),
@@ -30,6 +27,9 @@ export function chat(room: Room, socket: WebSocket) {
       }
     },
   };
+
+  type Action = keyof typeof actions;
+  type Message = { action: Action; payload: any };
 
   socket.onopen = () => {
     console.log("OPEN", currentUser.UUID);
