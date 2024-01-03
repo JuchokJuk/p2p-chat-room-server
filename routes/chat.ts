@@ -29,7 +29,6 @@ export function chat(room: Room, socket: WebSocket) {
   };
 
   function disconnectInactiveUser(){
-    console.log("disconnectInactiveUser", currentUser, timeoutId, room);
     currentUser.socket.close();
     clearTimeout(timeoutId);
     room.removeUser(currentUser);
@@ -39,23 +38,17 @@ export function chat(room: Room, socket: WebSocket) {
   type Message = { action: Action; payload: any };
 
   socket.onopen = () => {
-    console.log("OPEN", currentUser.UUID);
-
     timeoutId = setTimeout(disconnectInactiveUser, 10000);
     room.addUser(currentUser);
   };
 
   socket.onmessage = (event) => {
-    console.log("MESSAGE", currentUser.UUID, event.data);
-
     const message = JSON.parse(event.data) as Message;
 
     actions[message.action](message.payload);
   };
 
   socket.onclose = () => {
-    console.log("CLOSE", currentUser.UUID);
-
     clearTimeout(timeoutId);
     room.removeUser(currentUser);
   };
