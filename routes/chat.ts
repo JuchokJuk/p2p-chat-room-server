@@ -39,6 +39,8 @@ export function chat(room: Room, socket: WebSocket) {
   };
 
   socket.onmessage = (event) => {
+    console.log("MESSAGE", currentUser.UUID, event.data);
+    
     const message = JSON.parse(event.data) as Message;
 
     actions[message.action](message.payload);
