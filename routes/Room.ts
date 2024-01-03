@@ -7,7 +7,7 @@ export class Room {
   addUser(user: User) {
     if (this.users.length > 0) {
       send(user.socket, {
-        action: "save users",
+        action: "saveUsers",
         payload: this.users.map((user) => ({ UUID: user.UUID, peerUUID: user.peerUUID })).filter((user) => user.peerUUID),
       });
     }
@@ -19,7 +19,7 @@ export class Room {
 
     for (const currentUser of this.users) {
       send(currentUser.socket, {
-        action: "remove user",
+        action: "removeUser",
         payload: user.UUID,
       });
     }
