@@ -13,7 +13,7 @@ export function chat(room: Room, socket: WebSocket) {
   const actions = {
     heartbeat: () => {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(socket.close.bind(socket), 10000);
+      timeoutId = setTimeout(disconnectInactiveUser, 10000);
     },
     savePeerUUID: (UUID: string) => {
       currentUser.peerUUID = UUID;
@@ -28,13 +28,20 @@ export function chat(room: Room, socket: WebSocket) {
     },
   };
 
+  function disconnectInactiveUser(){
+    console.log("disconnectInactiveUser", currentUser, timeoutId, room);
+    currentUser.socket.close();
+    clearTimeout(timeoutId);
+    room.removeUser(currentUser);
+  }
+
   type Action = keyof typeof actions;
   type Message = { action: Action; payload: any };
 
   socket.onopen = () => {
     console.log("OPEN", currentUser.UUID);
 
-    timeoutId = setTimeout(socket.close.bind(socket), 10000);
+    timeoutId = setTimeout(disconnectInactiveUser, 10000);
     room.addUser(currentUser);
   };
 
