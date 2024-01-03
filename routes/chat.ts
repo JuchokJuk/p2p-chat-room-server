@@ -1,8 +1,11 @@
 import { send } from "../send.ts";
-import { Room } from "./Room.ts";
+import { Room, User } from "./Room.ts";
+
+type Action = "heartbeat" | "savePeerUUID";
+type Message = { action: Action; payload: any };
 
 export function chat(room: Room, socket: WebSocket) {
-  const currentUser = {
+  const currentUser: User = {
     UUID: crypto.randomUUID(),
     socket,
     peerUUID: undefined,
@@ -10,26 +13,13 @@ export function chat(room: Room, socket: WebSocket) {
 
   let timeoutId: number;
 
-  function close() {
-    console.log('FORCE CLOSE', currentUser.UUID)
-    socket.close();
-    room.removeUser(currentUser);
-  }
-
-  socket.addEventListener("open", () => {
-    console.log('OPEN', currentUser.UUID)
-    room.addUser(currentUser);
-    timeoutId = setTimeout(close, 10000);
-  });
-
-  socket.addEventListener("message", (event) => {
-    const message = JSON.parse(event.data);
-
-    if (message.action === "heartbeat") {
+  const actions = {
+    heartbeat: () => {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(close, 10000);
-    } else if (message.action === "save peer UUID") {
-      currentUser.peerUUID = message.payload;
+      timeoutId = setTimeout(socket.close, 10000);
+    },
+    savePeerUUID: (UUID: string) => {
+      currentUser.peerUUID = UUID;
       for (const user of room.users) {
         if (user !== currentUser) {
           send(user.socket, {
@@ -38,12 +28,26 @@ export function chat(room: Room, socket: WebSocket) {
           });
         }
       }
-    }
-  });
+    },
+  };
 
-  socket.addEventListener("close", () => {
-    console.log('CLOSE', currentUser.UUID)
+  socket.onopen = () => {
+    console.log("OPEN", currentUser.UUID);
+
+    timeoutId = setTimeout(socket.close, 10000);
+    room.addUser(currentUser);
+  };
+
+  socket.onmessage = (event) => {
+    const message = JSON.parse(event.data) as Message;
+
+    actions[message.action](message.payload);
+  };
+
+  socket.onclose = () => {
+    console.log("CLOSE", currentUser.UUID);
+
     clearTimeout(timeoutId);
     room.removeUser(currentUser);
-  });
+  };
 }
