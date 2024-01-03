@@ -8,7 +8,7 @@ export class Room {
     if (this.users.length > 0) {
       send(user.socket, {
         action: "save users",
-        payload: this.users.map((user) => ({ UUID: user.UUID, peerUUID: user.peerUUID })).filter((user) => user.peerUUID !== undefined),
+        payload: this.users.map((user) => ({ UUID: user.UUID, peerUUID: user.peerUUID })).filter((user) => user.peerUUID),
       });
     }
     this.users.push(user);
