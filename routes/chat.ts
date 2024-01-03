@@ -11,12 +11,13 @@ export function chat(room: Room, socket: WebSocket) {
   let timeoutId: number;
 
   function close() {
+    console.log('FORCE CLOSE', currentUser.UUID)
     socket.close();
     room.removeUser(currentUser);
   }
 
   socket.addEventListener("open", () => {
-
+    console.log('OPEN', currentUser.UUID)
     room.addUser(currentUser);
     timeoutId = setTimeout(close, 10000);
   });
@@ -41,6 +42,7 @@ export function chat(room: Room, socket: WebSocket) {
   });
 
   socket.addEventListener("close", () => {
+    console.log('CLOSE', currentUser.UUID)
     clearTimeout(timeoutId);
     room.removeUser(currentUser);
   });
