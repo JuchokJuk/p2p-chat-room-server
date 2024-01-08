@@ -39,7 +39,7 @@ export function chat(room: Room, socket: WebSocket) {
 
   socket.onopen = () => {
     timeoutId = setTimeout(disconnectInactiveUser, 10000);
-    room.addUser(currentUser);
+    room.addUser(currentUser, currentUser.UUID);
   };
 
   socket.onmessage = (event) => {

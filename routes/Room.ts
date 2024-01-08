@@ -4,11 +4,14 @@ export type User = { UUID: string; socket: WebSocket; peerUUID?: string };
 export class Room {
   users: User[] = [];
 
-  addUser(user: User) {
+  addUser(user: User, UUID: string) {
     if (this.users.length > 0) {
       send(user.socket, {
         action: "saveUsers",
-        payload: this.users.map((user) => ({ UUID: user.UUID, peerUUID: user.peerUUID })).filter((user) => user.peerUUID),
+        payload: {
+          users: this.users.map((user) => ({ UUID: user.UUID, peerUUID: user.peerUUID })).filter((user) => user.peerUUID),
+          UUID,
+        },
       });
     }
     this.users.push(user);
