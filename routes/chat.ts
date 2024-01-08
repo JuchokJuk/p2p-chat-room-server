@@ -17,14 +17,7 @@ export function chat(room: Room, socket: WebSocket) {
     },
     savePeerUUID: (UUID: string) => {
       currentUser.peerUUID = UUID;
-      for (const user of room.users) {
-        if (user !== currentUser) {
-          send(user.socket, {
-            action: "addUser",
-            payload: { UUID: currentUser.UUID, peerUUID: currentUser.peerUUID },
-          });
-        }
-      }
+      room.initUser(currentUser)
     },
   };
 
@@ -39,7 +32,7 @@ export function chat(room: Room, socket: WebSocket) {
 
   socket.onopen = () => {
     timeoutId = setTimeout(disconnectInactiveUser, 10000);
-    room.addUser(currentUser, currentUser.UUID);
+    room.addUser(currentUser);
   };
 
   socket.onmessage = (event) => {
